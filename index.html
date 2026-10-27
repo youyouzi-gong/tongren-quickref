@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>同人口味速查</title>
+<style>
+  :root{
+    --bg:#F9F6F2;
+    --card:#FFFFFF;
+    --line:#EDE4DD;
+    --text:#4B443F;
+    --sub:#9A8F87;
+    --accent:#C3A79B;
+    --accent-soft:#F4EAE4;
+    --accent-deep:#AC8B7D;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:
+      radial-gradient(circle at 12% 0%, #F4EAE3 0%, rgba(244,234,227,0) 45%),
+      radial-gradient(circle at 92% 12%, #E9F0EC 0%, rgba(233,240,236,0) 42%),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--text);
+    font-size:15px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:480px;
+    margin:0 auto;
+    padding:0 20px calc(40px + env(safe-area-inset-bottom));
+    min-height:100vh;
+  }
+
+  /* ---------- 顶部标题 ---------- */
+  .topbar{
+    padding:18px 0 6px;
+    font-size:13px;
+    letter-spacing:2px;
+    color:var(--sub);
+    text-align:center;
+  }
+  .topbar span{
+    display:inline-block;
+    padding-bottom:2px;
+    border-bottom:1px solid var(--line);
+  }
+
+  /* ---------- 屏幕切换 ---------- */
+  .screen{ display:none; }
+  .screen.active{ display:block; animation:fadeIn .28s ease both; }
+  @keyframes fadeIn{
+    from{ opacity:0; transform:translateY(8px); }
+    to{ opacity:1; transform:none; }
+  }
+
+  /* ---------- 封面 ---------- */
+  .cover{ padding-top:34px; text-align:center; }
+  .cover-label{
+    display:inline-block;
+    font-size:11.5px;
+    letter-spacing:2px;
+    color:#A9887A;
+    background:var(--accent-soft);
+    padding:4px 14px;
+    border-radius:20px;
+    margin-bottom:20px;
+  }
+  .cover-title{
+    font-size:30px;
+    font-weight:600;
+    letter-spacing:3px;
+    margin:0 0 10px;
+    color:#463F3A;
+  }
+  .cover-sub{
+    font-size:14px;
+    color:var(--sub);
+    margin:0 0 28px;
+    letter-spacing:.5px;
+  }
+  .cover-text{
+    text-align:left;
+    background:rgba(255,255,255,.72);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:20px 20px 14px;
+    margin-bottom:28px;
+  }
+  .cover-text p{
+    margin:0 0 12px;
+    font-size:14px;
+    line-height:1.9;
+    color:#5A524C;
+  }
+  .cover-text p.muted{
+    font-size:12.5px;
+    color:var(--sub);
+    margin-bottom:4px;
+  }
+  .cover-meta{
+    font-size:12px;
+    color:#B4A9A1;
+    margin:14px 0 0;
+    letter-spacing:.5px;
+  }
+
+  /* ---------- 按钮 ---------- */
+  .btn-primary{
+    display:block;
+    width:100%;
+    padding:15px;
+    background:var(--accent-deep);
+    color:#fff;
+    border:none;
+    border-radius:14px;
+    font-size:16px;
+    font-family:inherit;
+    letter-spacing:1.5px;
+    cursor:pointer;
+    transition:opacity .2s ease, transform .15s ease;
+  }
+  .btn-primary:disabled{ opacity:.35; cursor:not-allowed; }
+  .btn-primary:not(:disabled):active{ transform:scale(.985); }
+  .btn-ghost{
+    padding:15px 16px;
+    background:transparent;
+    color:var(--sub);
+    border:1px solid var(--line);
+    border-radius:14px;
+    font-size:14px;
+    font-family:inherit;
+    cursor:pointer;
+    transition:opacity .2s ease;
+  }
+  .btn-ghost[hidden]{ visibility:hidden; }
+
+  /* ---------- 答题 ---------- */
+  .quiz{ padding-top:12px; }
+  .quiz-head{ margin-bottom:26px; }
+  .progress-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12px;
+    color:var(--sub);
+    letter-spacing:.5px;
+    margin-bottom:8px;
+  }
+  .stage-label{ color:#A9887A; }
+  .progress-bar{
+    height:4px;
+    background:#EFE7E1;
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:0;
+    background:var(--accent);
+    border-radius:4px;
+    transition:width .3s ease;
+  }
+  .q-text{
+    font-size:18px;
+    font-weight:600;
+    line-height:1.65;
+    margin:0 0 20px;
+    letter-spacing:.4px;
+  }
+  .option{
+    display:flex;
+    align-items:flex-start;
+    gap:11px;
+    width:100%;
+    text-align:left;
+    padding:14px 16px;
+    margin-bottom:10px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    font-size:14.5px;
+    font-family:inherit;
+    color:var(--text);
+    line-height:1.65;
+    cursor:pointer;
+    transition:background .18s ease, border-color .18s ease;
+  }
+  .opt-mark{
+    flex:0 0 20px;
+    height:20px;
+    line-height:20px;
+    text-align:center;
+    border-radius:50%;
+    background:#F2EBE5;
+    color:#B0A198;
+    font-size:11px;
+    margin-top:3px;
+    transition:background .18s ease, color .18s ease;
+  }
+  .option.selected{
+    background:var(--accent-soft);
+    border-color:var(--accent);
+  }
+  .option.selected .opt-mark{
+    background:var(--accent);
+    color:#fff;
+  }
+  .actions{
+    display:flex;
+    gap:10px;
+    margin-top:26px;
+  }
+  .actions .btn-primary{ flex:1 1 auto; }
+
+  /* ---------- 结果 ---------- */
+  .result{ padding-top:18px; }
+  .result-head{ margin-bottom:26px; }
+  .result-head h2{
+    font-size:21px;
+    font-weight:600;
+    letter-spacing:1.5px;
+    margin:0 0 8px;
+  }
+  .result-head p{
+    font-size:12.5px;
+    color:var(--sub);
+    margin:0;
+    letter-spacing:.3px;
+  }
+  .phase{ margin-bottom:30px; }
+  .phase-head{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin-bottom:12px;
+  }
+  .phase-head::before{
+    content:'';
+    width:4px;
+    height:15px;
+    border-radius:2px;
+    background:var(--accent);
+  }
+  .phase-name{
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:1px;
+  }
+  .taste-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:15px 17px;
+    margin-bottom:10px;
+  }
+  .taste-card.main{
+    border-color:#DEC9BE;
+    background:linear-gradient(180deg,#FDFAF8 0%,#FFFFFF 100%);
+  }
+  .taste-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:5px;
+  }
+  .taste-tag{
+    font-size:11px;
+    letter-spacing:1px;
+    color:#AD8D7E;
+  }
+  .taste-pct{
+    font-size:13px;
+    font-weight:600;
+    color:var(--accent-deep);
+  }
+  .taste-name{
+    font-size:19px;
+    font-weight:600;
+    letter-spacing:1.5px;
+    margin-bottom:6px;
+  }
+  .taste-card:not(.main) .taste-name{
+    font-size:17px;
+    letter-spacing:1px;
+  }
+  .taste-desc{
+    margin:0;
+    font-size:13.5px;
+    line-height:1.8;
+    color:var(--sub);
+  }
+  .result-foot{
+    margin-top:34px;
+    padding-top:4px;
+  }
+  .result-note{
+    font-size:11.5px;
+    color:#BDB2AA;
+    text-align:center;
+    margin:16px 0 0;
+    letter-spacing:.5px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar"><span>同人口味速查</span></header>
+
+  <!-- ================= 封面 ================= -->
+  <section id="screen-cover" class="screen active">
+    <div class="cover">
+      <div class="cover-label">心理小测试</div>
+      <h1 class="cover-title">同人口味速查</h1>
+      <p class="cover-sub">你更想看到什么样的关系走向</p>
+
+      <div class="cover-text">
+        <p>欢迎来到「同人口味速查」。</p>
+        <p>这是一份关于“你更想看到什么样的关系走向”的偏好测试。测试中准备了两个空白的人，ta 们不限性别、不限性向、不限身份，也没有预设的性格与过去。ta 们怎么认识、为什么靠近、因何产生矛盾、最后走向哪里，全部由你在题目中决定。</p>
+        <p class="muted">本测试并非权威心理测试，仅供娱乐。</p>
+      </div>
+
+      <button id="startBtn" class="btn-primary">开始测试</button>
+      <p class="cover-meta">共 24 题 · 约 3 分钟</p>
+    </div>
+  </section>
+
+  <!-- ================= 答题 ================= -->
+  <section id="screen-quiz" class="screen">
+    <div class="quiz">
+      <div class="quiz-head">
+        <div class="progress-row">
+          <span class="stage-label" id="stageLabel">关系模式</span>
+          <span id="progressNum">1/24</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+
+      <h2 class="q-text" id="qText"></h2>
+      <div id="options"></div>
+
+      <div class="actions">
+        <button id="prevBtn" class="btn-ghost">上一题</button>
+        <button id="nextBtn" class="btn-primary" disabled>下一题</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 结果 ================= -->
+  <section id="screen-result" class="screen">
+    <div class="result">
+      <div class="result-head">
+        <h2>你的同人口味</h2>
+        <p>三个维度独立统计，每个维度展示有得分的词条</p>
+      </div>
+      <div id="resultBody"></div>
+      <div class="result-foot">
+        <button id="restartBtn" class="btn-primary">重新测试</button>
+        <p class="result-note">结果仅供娱乐，不必当真</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   一、阶段与词条定义
+   ============================================================ */
+const STAGES = [
+  {
+    name: '关系模式',
+    total: 6,
+    words: ['上克下','下克上','宿敌','挚友','青梅竹马','天降奇缘','一见钟情','日久生情']
+  },
+  {
+    name: '情感模式',
+    total: 20,
+    words: ['求而不得','欢喜冤家','圣人私心','烂人真心','棋逢对手','双向奔赴',
+            '相爱相杀','互相救赎','明月高悬','强弱分明','老夫老妻','双向沉沦']
+  },
+  {
+    name: '叙事偏好',
+    total: 22,
+    words: ['强取豪夺','追妻火葬场','默默守护','追夫火葬场','破镜重圆',
+            '镜花水月','恨海情天','兰因絮果','一别两宽','旧情复燃']
+  }
+];
+
+/* 词条总结语句 */
+const DESC = {
+  '上克下':'高位者天然压着低位者，关系从权力差开始。低位者被安排被管理，高位者习惯掌控节奏。',
+  '下克上':'低位者不断试探越界，挑战高位者的秩序。高位者被冒犯却未必推开，权力差在僭越里松动。',
+  '宿敌':'两人立场天然对立，彼此为敌。最懂对方的人站在对面，较劲里带着只有对方接得住的张力。',
+  '挚友':'两人以信任为底色，长期站在同一边。亲近到不用解释，也敢把后背交给对方。',
+  '青梅竹马':'从小一起长大，熟悉到成为彼此的背景。默契不用刻意建立，日常本身就是关系的根基。',
+  '天降奇缘':'意外闯入彼此生活，关系从偶然开始。原本没有交集的两个人被命运推到一处。',
+  '一见钟情':'心动发生在第一眼，快得来不及讲道理。被对方某个瞬间击中，之后才慢慢认识这个人。',
+  '日久生情':'感情在长期相处里慢慢长出来。不是第一眼心动，是日复一日里发现离不开。',
+  '求而不得':'想要靠近却始终差一步，最后没有真正得到。守护、退让、祝福，都指向同一个结果：ta没有选我。',
+  '明月高悬':'对方像高悬的月亮，可望而不可即。仰望者不敢伸手，距离本身成了关系的一部分。',
+  '双向奔赴':'两个人用同样的速度走向对方。没有拉扯和猜忌，不用猜ta也在走向你。',
+  '棋逢对手':'两人势均力敌，谁也不肯先服软。较劲里带着欣赏，只有对方接得住自己的招。',
+  '强弱分明':'关系里位置差很清楚，一方强一方弱。强弱本身构成张力，靠近时总带着仰视或俯视。',
+  '老夫老妻':'相处像过了很多年的伴侣，日常又稳又熟。吵归吵，转头还是一起过日子。',
+  '相爱相杀':'越爱越容易互相刺伤，越伤又越分不开。只有对方值得自己拔刀，也只有对方接得住刀。',
+  '欢喜冤家':'嘴上不饶人，行动上比谁都在意。吵不散闹不走，所有人都看出来只有他们不承认。',
+  '烂人真心':'风评复杂的人，唯独对一个人露出过真心。对外心狠，转头把最后一点干净留给ta。',
+  '圣人私心':'对所有人公平的人，唯独为一个人破例。别人不行，只有你可以，克制者的偏心最致命。',
+  '互相救赎':'两个人把对方从低谷里拉出来。不是谁单方面拯救谁，是彼此都成了对方的光。',
+  '双向沉沦':'两个人一起往下沉，谁也不肯先上岸。不是不知道结局，是宁愿一起烂到底。',
+  '强取豪夺':'一方用强势手段把人留在身边，关系从强制开始。不是两情相悦的开局，是先把人抓住再谈其他。',
+  '默默守护':'一方安静守在旁边，不声张也不求回报。被守护的人未必知道，守护的人也不打算说。',
+  '追妻火葬场':'前期把对方的心踩碎，后期放下所有骄傲去追。爽点不在追到，在ta终于知道疼了。',
+  '追夫火葬场':'追悔的一方换成被追的那一个，位置倒转。曾经不肯回头的人，如今追着对方跑。',
+  '破镜重圆':'关系碎过，分开过，最后又走回彼此身边。重点不是复合，是碎过之后还认得出对方。',
+  '一别两宽':'最后没有复合，两个人体面地各自走开。不是不难过，是知道再纠缠也没有用。',
+  '镜花水月':'眼前像拥有过一切，伸手却发现只是幻影。不是被谁夺走，是本来就没真正抓住。',
+  '恨海情天':'爱和恨缠成死结，伤害和爱意来自同一个人。不是不爱，是爱里全是算不清的账。',
+  '兰因絮果':'开局有多美，结局就有多荒凉。不是不爱，是命定走不到一起，越体面越痛。',
+  '旧情复燃':'断过的感情在某个瞬间重新烧起来。旧人还在，旧情也没死。'
+};
+
+/* ============================================================
+   二、题库（stage: 0=关系模式 1=情感模式 2=叙事偏好）
+   ============================================================ */
+const QUESTIONS = [
+  /* ---------- 关系模式 1-3 ---------- */
+  { stage:0, text:'你更看重以下哪一方面？', options:[
+    ['明显的地位差距',['上克下','下克上']],
+    ['特殊的羁绊联结',['宿敌','挚友']],
+    ['两人的相识契机',['青梅竹马','天降奇缘']],
+    ['特殊的心动方式',['一见钟情','日久生情']]
+  ]},
+  { stage:0, text:'你更想看到两人相处中先冒出哪种感觉？', options:[
+    ['原有秩序中慢慢滋生的暗涌',['上克下','日久生情']],
+    ['原有秩序被打破后的紧张',['下克上','天降奇缘']],
+    ['第一眼就挪不开视线的危险',['宿敌','一见钟情']],
+    ['朋友关系忽然变质的恍惚',['挚友','青梅竹马']]
+  ]},
+  { stage:0, text:'你更想看到两人关系中的张力来自哪种组合？', options:[
+    ['一方习惯性管理另一方',['上克下','青梅竹马']],
+    ['意外出现的人挑战原有秩序',['下克上','天降奇缘']],
+    ['长期针锋相对里逐渐说不清的较劲',['宿敌','日久生情']],
+    ['长久熟稔里某次忽然对上的视线',['挚友','一见钟情']]
+  ]},
+
+  /* ---------- 情感模式 4-13 ---------- */
+  { stage:1, text:'你更想看到两人陷入哪种情感拉扯？', options:[
+    ['藏着恋爱心事和对方吵吵闹闹地靠近',['求而不得','欢喜冤家']],
+    ['只对着对方献上特殊的感情',['圣人私心','烂人真心']],
+    ['势均力敌的两个人相互拉扯',['棋逢对手','双向奔赴']],
+    ['互相刺伤但看不得对方深陷低谷',['相爱相杀','互相救赎']]
+  ]},
+  { stage:1, text:'你更想看到两人在关系性上偏向哪种？', options:[
+    ['强弱分明，仰望者不敢伸手',['明月高悬','强弱分明']],
+    ['吵吵闹闹，但又无比默契',['老夫老妻','欢喜冤家']],
+    ['深陷泥沼，只愿向对方靠近',['烂人真心','互相救赎']],
+    ['唯一例外，最后一同沉沦',['圣人私心','双向沉沦']]
+  ]},
+  { stage:1, text:'你更想看到两人在立场拉扯时偏向哪种？', options:[
+    ['上位者唯独对下位者轻轻放过',['明月高悬','圣人私心']],
+    ['地位悬殊越爱越容易互相伤害',['强弱分明','相爱相杀']],
+    ['立场一致落难时谁也不会松手',['老夫老妻','互相救赎']],
+    ['棋逢对手较劲到最后一起沉沦',['棋逢对手','双向沉沦']]
+  ]},
+  { stage:1, text:'你更想看到两人在日常关系底色上偏向哪种？', options:[
+    ['清冷高悬的人被拉进吵吵闹闹的烟火气',['明月高悬','欢喜冤家']],
+    ['长久相处里把对方划进自己日常的默契',['老夫老妻','双向奔赴']],
+    ['满身泥沼的人最后拉着对方一起往下沉',['烂人真心','双向沉沦']],
+    ['地位悬殊却越靠近越像在彼此消耗',['强弱分明','相爱相杀']]
+  ]},
+  { stage:1, text:'你更想看到两人在低谷或高位时偏向哪种？', options:[
+    ['高不可攀的人偏偏对一个人求而不得',['明月高悬','求而不得']],
+    ['看起来一身劣骨却只在一个人面前松口',['烂人真心','老夫老妻']],
+    ['地位悬殊却愿意把对方从泥里拉出来',['强弱分明','互相救赎']],
+    ['棋逢对手谁也不肯先上岸最后一起沉沦',['棋逢对手','双向沉沦']]
+  ]},
+  { stage:1, text:'你更想看到两人关系里浮现哪种底色？', options:[
+    ['高不可攀的人最后选择与对方一同沉落',['明月高悬','双向沉沦']],
+    ['吵吵闹闹里两个人还是走向同一处',['双向奔赴','欢喜冤家']],
+    ['势均力敌的两个人越较劲越像在互相消耗',['棋逢对手','相爱相杀']],
+    ['原本沉沦的人动了真心却始终够不到',['烂人真心','求而不得']]
+  ]},
+  { stage:1, text:'你更想看到两人关系里哪种核心张力？', options:[
+    ['一身劣骨的人在悬殊位置里仍动了真心',['烂人真心','强弱分明']],
+    ['势均力敌的两个人用同样的速度靠近',['棋逢对手','双向奔赴']],
+    ['越爱越伤之后还是把对方拉出泥潭',['相爱相杀','互相救赎']],
+    ['对所有人公正的人唯独对一个人求而不得',['圣人私心','求而不得']]
+  ]},
+  { stage:1, text:'你更想看到两人关系里哪种日常瞬间？', options:[
+    ['吵完架还是会下意识给对方留个位置',['欢喜冤家','老夫老妻']],
+    ['嘴上不饶人却总在对方落难时先伸手',['欢喜冤家','互相救赎']],
+    ['对谁都公事公办唯独对对方一让再让，也相信对方会走来',['圣人私心','双向奔赴']],
+    ['明知够不到还是忍不住一直看向那个人',['求而不得','明月高悬']]
+  ]},
+  { stage:1, text:'当关系陷入拉扯时，你更想看到哪种走向？', options:[
+    ['势均力敌的两个人谁也不肯先低头',['棋逢对手','相爱相杀']],
+    ['一方明明占尽优势却还是对对方狠不下心',['强弱分明','圣人私心']],
+    ['互相伤害之后还是把对方从泥里拉出来',['相爱相杀','互相救赎']],
+    ['嘴上没个正经却把唯一真心给了对方',['烂人真心','欢喜冤家']]
+  ]},
+  { stage:1, text:'如果故事最后只能留下一种关系状态，你更想看到哪种？', options:[
+    ['两个人在较劲中也始终朝对方靠近',['棋逢对手','双向奔赴']],
+    ['身体离得很近但心却离得很远',['老夫老妻','求而不得']],
+    ['对所有人公正的人唯独为对方破例，也终于等到ta走来',['圣人私心','双向奔赴']],
+    ['明知得不到还是选择拉着对方一起沉下去',['求而不得','双向沉沦']]
+  ]},
+
+  /* ---------- 叙事偏好 14-24 ---------- */
+  { stage:2, text:'故事开场，你更想先看到哪种关系被点燃？', options:[
+    ['先以强势手段把人留在身边，等失去后才放下身段去追',['强取豪夺','追妻火葬场']],
+    ['一直安静守在旁边，等对方终于回头时，守护的人已经不肯再往前',['默默守护','追夫火葬场']],
+    ['分开后重新走到一起，可握住的仍像一场随时会散的幻影',['破镜重圆','镜花水月']],
+    ['爱恨纠缠到最后，最体面的收场也只剩命运的荒凉',['恨海情天','兰因絮果']]
+  ]},
+  { stage:2, text:'当关系进入追逐的阶段，你更想看到哪种走向？', options:[
+    ['一方先把人困在身边，后来却轮到ta低头去追',['强取豪夺','追夫火葬场']],
+    ['守护的人一直不声张，直到对方追悔时才发现自己早已走远',['默默守护','追妻火葬场']],
+    ['两个人试着重新开始，可旧账和爱恨始终横在中间',['破镜重圆','恨海情天']],
+    ['短暂拥有过一场幻梦，最后越走越远',['镜花水月','兰因絮果']]
+  ]},
+  { stage:2, text:'如果故事必须经历一次重大转折，你更想看到哪种？', options:[
+    ['曾经用强硬手段留住的人，分开后竟又走回彼此身边',['强取豪夺','破镜重圆']],
+    ['安静守了太久，最后却被爱恨纠缠彻底吞没',['默默守护','恨海情天']],
+    ['追悔的人终于低下头，追回来的却只剩一场抓不住的幻影',['追妻火葬场','镜花水月']],
+    ['追着对方跑了很久，最后在命运的推动下草草结束',['追夫火葬场','兰因絮果']]
+  ]},
+  { stage:2, text:'当一段关系走到岔路口，你更想看到？', options:[
+    ['追悔之后没有复合，两个人体面地各自走开',['追妻火葬场','一别两宽']],
+    ['追着旧人回头，旧情也重新烧起来',['追夫火葬场','旧情复燃']],
+    ['明明重新走到一起，最后却不得不只留下一声叹息',['破镜重圆','兰因絮果']],
+    ['曾经的美好像幻影散去，留下来的只有爱恨纠缠',['镜花水月','恨海情天']]
+  ]},
+  { stage:2, text:'你更想看到关系从哪种状态被推动？', options:[
+    ['先强势地把人留在身边，最后却体面放手',['强取豪夺','一别两宽']],
+    ['安静守了很多年，旧情在某一刻重新烧起来',['默默守护','旧情复燃']],
+    ['分开后重新走到一起，可旧账和爱恨还没算完',['破镜重圆','恨海情天']],
+    ['短暂拥有过一场幻梦，最后在宿命里彻底散掉',['镜花水月','兰因絮果']]
+  ]},
+  { stage:2, text:'你更想看到哪种结局？', options:[
+    ['强势留住的人，最后把关系拖成爱恨纠缠',['强取豪夺','恨海情天']],
+    ['守了一辈子，最后仍摆脱不了命运',['默默守护','兰因絮果']],
+    ['追悔之后旧情复燃，两个人重新靠近',['追妻火葬场','旧情复燃']],
+    ['追着对方跑了很久，最后选择体面告别',['追夫火葬场','一别两宽']]
+  ]},
+  { stage:2, text:'如果关系里必须有一个人先迈出那一步，你更想看到哪种？', options:[
+    ['强势的人先伸手，抓回来的却只是幻影',['强取豪夺','镜花水月']],
+    ['沉默的人先迈步，碎过的关系居然重新拼好',['默默守护','破镜重圆']],
+    ['追悔的人先低头，最后仍体面走散',['追妻火葬场','一别两宽']],
+    ['追着旧人回头，旧情也重新燃烧',['追夫火葬场','旧情复燃']]
+  ]},
+  { stage:2, text:'故事进入收束阶段，你更想看到哪种余味？', options:[
+    ['一直守着的人最后只守到一场幻影',['默默守护','镜花水月']],
+    ['追着对方回头，最后却陷进爱恨纠缠',['追夫火葬场','恨海情天']],
+    ['分开后重新走到一起，旧情也复燃',['破镜重圆','旧情复燃']],
+    ['体面告别之后，只留一声叹息',['一别两宽','兰因絮果']]
+  ]},
+  { stage:2, text:'当一段关系有机会重来，你更想看到哪种走向？', options:[
+    ['无论如何想留住的人都无法留住',['强取豪夺','兰因絮果']],
+    ['追悔之后两个人重新拼好碎掉的关系',['追妻火葬场','破镜重圆']],
+    ['嘴上说体面告别，爱恨其实还没散',['一别两宽','恨海情天']],
+    ['幻影中藏着未熄灭的火焰',['镜花水月','旧情复燃']]
+  ]},
+  { stage:2, text:'最后一幕之前，你更想看到哪种关系转折？', options:[
+    ['强势的人终于低头，一切还有转变',['强取豪夺','旧情复燃']],
+    ['守了很久的人选择体面离开',['默默守护','一别两宽']],
+    ['追悔到最后，也无法追回那个人',['追妻火葬场','兰因絮果']],
+    ['追着对方回头，抓回来的却只是幻影',['追夫火葬场','镜花水月']]
+  ]},
+  { stage:2, text:'如果给这段故事定一个收束方式，你更想选哪种？', options:[
+    ['一边强势靠近，一边沉默守护',['强取豪夺','默默守护']],
+    ['两个人轮流追悔，谁都不肯先停下',['追妻火葬场','追夫火葬场']],
+    ['重新走到一起和体面告别只差一线',['破镜重圆','一别两宽']],
+    ['爱恨纠缠到最后像是烈火那般',['恨海情天','旧情复燃']]
+  ]}
+];
+
+/* ============================================================
+   三、状态
+   ============================================================ */
+const LETTERS = ['A','B','C','D'];
+let answers = new Array(QUESTIONS.length).fill(null);
+let current = 0;
+
+/* DOM */
+const screens = {
+  cover: document.getElementById('screen-cover'),
+  quiz: document.getElementById('screen-quiz'),
+  result: document.getElementById('screen-result')
+};
+const stageLabel = document.getElementById('stageLabel');
+const progressNum = document.getElementById('progressNum');
+const progressFill = document.getElementById('progressFill');
+const qText = document.getElementById('qText');
+const optionsBox = document.getElementById('options');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const resultBody = document.getElementById('resultBody');
+
+/* ============================================================
+   四、页面切换
+   ============================================================ */
+function showScreen(name){
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[name].classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   五、答题渲染
+   ============================================================ */
+function renderQuestion(){
+  const q = QUESTIONS[current];
+
+  stageLabel.textContent = '【' + STAGES[q.stage].name + '】';
+  progressNum.textContent = (current + 1) + '/' + QUESTIONS.length;
+  progressFill.style.width = ((current + 1) / QUESTIONS.length * 100) + '%';
+
+  qText.textContent = q.text;
+
+  optionsBox.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'option' + (answers[current] === i ? ' selected' : '');
+    btn.innerHTML =
+      '<span class="opt-mark">' + LETTERS[i] + '</span>' +
+      '<span class="opt-text">' + opt[0] + '</span>';
+    btn.addEventListener('click', () => selectOption(i));
+    optionsBox.appendChild(btn);
+  });
+
+  nextBtn.disabled = answers[current] === null;
+  nextBtn.textContent = current === QUESTIONS.length - 1 ? '查看结果' : '下一题';
+
+  prevBtn.hidden = current === 0;
+}
+
+function selectOption(index){
+  answers[current] = index;
+  const nodes = optionsBox.querySelectorAll('.option');
+  nodes.forEach((n, i) => n.classList.toggle('selected', i === index));
+  nextBtn.disabled = false;
+}
+
+/* ============================================================
+   六、计分与结果渲染
+   ============================================================ */
+function computeStage(stageIndex){
+  const stage = STAGES[stageIndex];
+  const scores = {};
+  stage.words.forEach(w => { scores[w] = 0; });
+
+  QUESTIONS.forEach((q, qi) => {
+    if (q.stage !== stageIndex) return;
+    const a = answers[qi];
+    if (a === null) return;
+    q.options[a][1].forEach(tag => {
+      if (scores[tag] !== undefined) scores[tag] += 1;
+    });
+  });
+
+  // 只展示有得分的词条，按得分（占比）从高到低排序
+  // 同分时保持该阶段预设词条数组顺序（sort 稳定）
+  const entries = stage.words
+    .map((w, i) => ({ word: w, score: scores[w] }))
+    .filter(e => e.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  return { stage, entries };
+}
+
+function renderResult(){
+  resultBody.innerHTML = '';
+
+  [0, 1, 2].forEach(si => {
+    const { stage, entries } = computeStage(si);
+
+    const phaseEl = document.createElement('div');
+    phaseEl.className = 'phase';
+
+    const head = document.createElement('div');
+    head.className = 'phase-head';
+    head.innerHTML = '<span class="phase-name">' + stage.name + '</span>';
+    phaseEl.appendChild(head);
+
+    if (entries.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'taste-card';
+      empty.innerHTML = '<p class="taste-desc">本阶段暂无得分词条。</p>';
+      phaseEl.appendChild(empty);
+    } else {
+      entries.forEach((e, i) => {
+        const pct = Math.round(e.score / stage.total * 100);
+        const isMain = i === 0;
+        const card = document.createElement('div');
+        card.className = 'taste-card' + (isMain ? ' main' : '');
+        card.innerHTML =
+          '<div class="taste-top">' +
+            '<span class="taste-tag">' + (isMain ? '主同人口味' : '同人口味') + '</span>' +
+            '<span class="taste-pct">' + pct + '%</span>' +
+          '</div>' +
+          '<div class="taste-name">' + e.word + '</div>' +
+          '<p class="taste-desc">' + (DESC[e.word] || '') + '</p>';
+        phaseEl.appendChild(card);
+      });
+    }
+
+    resultBody.appendChild(phaseEl);
+  });
+}
+
+/* ============================================================
+   七、事件绑定
+   ============================================================ */
+document.getElementById('startBtn').addEventListener('click', () => {
+  current = 0;
+  renderQuestion();
+  showScreen('quiz');
+});
+
+nextBtn.addEventListener('click', () => {
+  if (answers[current] === null) return;
+  if (current < QUESTIONS.length - 1){
+    current += 1;
+    renderQuestion();
+  } else {
+    renderResult();
+    showScreen('result');
+  }
+});
+
+prevBtn.addEventListener('click', () => {
+  if (current > 0){
+    current -= 1;
+    renderQuestion();
+  }
+});
+
+document.getElementById('restartBtn').addEventListener('click', () => {
+  answers = new Array(QUESTIONS.length).fill(null);
+  current = 0;
+  optionsBox.innerHTML = '';
+  qText.textContent = '';
+  progressFill.style.width = '0%';
+  showScreen('cover');
+});
+</script>
+</body>
+</html>
